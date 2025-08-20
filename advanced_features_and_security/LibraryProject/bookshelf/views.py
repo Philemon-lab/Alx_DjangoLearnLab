@@ -50,3 +50,23 @@ def book_search(request):
         query = form.cleaned_data['query']
         books = books.filter(title__icontains=query)  # Safe ORM query
     return render(request, 'bookshelf/book_list.html', {'books': books, 'form': form})
+def book_list(request):
+    # Example book list view (assuming Book model exists)
+    books = Book.objects.all()  # Make sure you import Book if used
+    return render(request, 'bookshelf/book_list.html', {'books': books})
+
+# New view for ExampleForm
+def example_form_view(request):
+    if request.method == 'POST':
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            # Process form data here (e.g., save to DB or print)
+            title = form.cleaned_data['title']
+            author = form.cleaned_data['author']
+            published_date = form.cleaned_data['published_date']
+            # Example: just printing to console
+            print(f"Received Book: {title} by {author}, published on {published_date}")
+            return redirect('example_form')  # Redirect after POST
+    else:
+        form = ExampleForm()
+    return render(request, 'bookshelf/form_example.html', {'form': form})
