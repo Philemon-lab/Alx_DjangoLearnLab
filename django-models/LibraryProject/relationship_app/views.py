@@ -6,6 +6,8 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from .models import Book
 from .forms import BookForm
+from django.contrib.auth.decorators import permission_required
+
 # Existing views (list_books, library_detail, role-based views, etc.)
 # ...
 
@@ -70,3 +72,12 @@ def delete_book(request, pk):
         book.delete()
         return redirect('list_books')
     return render(request, 'relationship_app/delete_book.html', {'book': book})
+
+@permission_required('relationship_app.can_add_book', raise_exception=True)
+def add_book(request):
+    # your existing logic for adding a book
+    if request.method == 'POST':
+        # handle form submission
+        pass
+    # render add_book.html
+    return render(request, 'relationship_app/add_book.html')

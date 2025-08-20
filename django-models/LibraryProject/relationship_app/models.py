@@ -46,3 +46,12 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+    
+    class Book(models.Model):
+    # your fields here
+    class Meta:
+        permissions = [
+            ("can_add_book", "Can add book"),
+            ("can_change_book", "Can edit book"),
+            ("can_delete_book", "Can delete book"),
+        ]
