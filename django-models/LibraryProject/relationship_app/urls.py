@@ -1,21 +1,18 @@
 from django.urls import path
-from .views import list_books, LibraryDetailView
-
-app_name = 'relationship_app'
-
-urlpatterns = [
-    # Function-based view URL
-    path('books/', list_books, name='list_books'),
-
-    # Class-based view URL
-    path('library/<int:pk>/', LibraryDetailView.as_view(), name='library_detail'),
-]
-from django.urls import path
+from django.contrib.auth.views import LoginView, LogoutView
 from . import views
 
 urlpatterns = [
-    path('register/', views.register_view, name='register'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
+    # Authentication URLs
+    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', LogoutView.as_view(template_name='logout.html'), name='logout'),
+
+    # Other app-specific URLs
+    path('books/', views.list_books, name='list_books'),
+    path('library/<int:pk>/', views.library_detail, name='library_detail'),
+
+    # Role-based views
+    path('admin-view/', views.admin_view, name='admin_view'),
+    path('librarian-view/', views.librarian_view, name='librarian_view'),
+    path('member-view/', views.member_view, name='member_view'),
 ]
-path('', views.home, name='home')
