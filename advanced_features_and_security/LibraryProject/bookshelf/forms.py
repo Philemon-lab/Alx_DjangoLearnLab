@@ -5,3 +5,5 @@ class BookForm(forms.ModelForm):
     class Meta:
         model = Book
         fields = ['title', 'author', 'published_date', 'isbn']
+class BookSearchForm(forms.Form):
+    query = forms.CharField(max_length=255, required=False)

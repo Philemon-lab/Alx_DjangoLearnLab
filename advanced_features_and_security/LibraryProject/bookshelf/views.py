@@ -16,6 +16,8 @@ class BookAdmin(admin.ModelAdmin):
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import permission_required
 from .models import Book
+from django.contrib.auth.decorators import login_required
+from .forms import BookSearchForm
 
 @permission_required('bookshelf.can_view', raise_exception=True)
 def view_books(request):
@@ -40,3 +42,11 @@ def delete_book(request, book_id):
 def book_list(request):
     books = Book.objects.all()
     return render(request, 'bookshelf/book_list.html', {'books': books})
+@login_required
+def book_search(request):
+    form = BookSearchForm(request.GET or None)
+    books = Book.objects.all()
+    if form.is_valid():
+        query = form.cleaned_data['query']
+        books = books.filter(title__icontains=query)  # Safe ORM query
+    return render(request, 'bookshelf/book_list.html', {'books': books, 'form': form})
