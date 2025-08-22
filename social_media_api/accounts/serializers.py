@@ -2,6 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
@@ -38,7 +41,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create and return a new user instance"""
         validated_data.pop('password_confirm')
-        user = CustomUser.objects.create_user(**validated_data)
+        user = get_user_model().objects.create_user(**validated_data)
+        token.objects.create(user=user)
+
         return user
 
 class UserLoginSerializer(serializers.Serializer):
