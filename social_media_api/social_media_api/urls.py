@@ -23,9 +23,9 @@ from .views import CustomUserListView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('accounts.urls')),
-    path('api/posts/', include('posts.urls'))
-    path('users/', CustomUserListView.as_view(), name='customuser-list'),
-
+    path('api/posts/', include('posts.urls')),  # <-- comma added here
+    path('api/users/', CustomUserListView.as_view(), name='customuser-list'),
+    path('api/notifications/', include('notifications.urls')),
 ]
 
 if settings.DEBUG:
