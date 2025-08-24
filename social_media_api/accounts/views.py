@@ -1,6 +1,7 @@
 from rest_framework import status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from .models import CustomUser
 from .serializers import (
@@ -86,3 +87,23 @@ def profile(request):
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+def follow_user(request, user_id):
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    if target_user == request.user:
+        return Response({"error": "You cannot follow yourself."}, status=400)
+    request.user.following.add(target_user)
+    return Response({"message": f"You are now following {target_user.username}"})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    if target_user == request.user:
+        return Response({"error": "You cannot unfollow yourself"}, status=400)
+
+    request.user.unfollowing.remove(target_user)
+    return Response({"message": f"You have unfollowed {target_user.username}"})    
+    user_to_unfollow = get_object_or_404(CustomUser, id=user_id)
+    request.user.following.remove(user_to_unfollow)
+    return Response({"message": f"You have unfollowed {user_to_unfollow.username}"})
