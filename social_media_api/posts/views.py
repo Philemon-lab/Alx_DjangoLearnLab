@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .models import Post, Comment,Like
 from .serializers import PostSerializer, CommentSerializer
 from notifications.models import Notification
+from django.shortcuts import get_object_or_404
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
@@ -54,3 +55,9 @@ def feed(request):
     posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')
     serializer = PostSerializer(posts, many=True)
     return Response(serializer.data)
+
+class PostLikeView(generics.GenericAPIView):
+    serializer_class = PostSerializer
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
