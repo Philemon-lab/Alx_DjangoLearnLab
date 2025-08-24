@@ -1,18 +1,19 @@
-
-from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework import viewsets, generics
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Post, Comment,Like
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from notifications.models import Notification
-from django.shortcuts import get_object_or_404
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
-    permission_classes = [permission_IsAuthenticated]
-    
+    permission_classes = [IsAuthenticated]
+
     @action(detail=True, methods=['POST'])
     def like(self, request, pk=None):
         post = self.get_object()
@@ -37,17 +38,17 @@ class PostViewSet(viewsets.ModelViewSet):
         except Like.DoesNotExist:
             return Response({'status': 'not liked yet'}, status=status.HTTP_400_BAD_REQUEST)
 
-
     def get_queryset(self):
         user = self.request.user
         following_users = user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
-    
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
 
 def feed(request):
     user = request.user
@@ -56,8 +57,20 @@ def feed(request):
     serializer = PostSerializer(posts, many=True)
     return Response(serializer.data)
 
+
 class PostLikeView(generics.GenericAPIView):
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if created:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb="liked your post",
+                target=post
+            )
+            return Response({'status': 'post liked'})
+        return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
