@@ -1,10 +1,8 @@
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import get_user_model
-
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
@@ -33,17 +31,26 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         }
     
     def validate(self, data):
-        """Verify that passwords match"""
+        """
+        Verify that passwords match
+        """
         if data['password'] != data['password_confirm']:
             raise serializers.ValidationError("Passwords don't match.")
         return data
     
     def create(self, validated_data):
-        """Create and return a new user instance"""
+        """
+        Create and return a new user instance with token
+        """
+        # Remove password_confirm from validated_data
         validated_data.pop('password_confirm')
-        user = get_user_model().objects.create_user(**validated_data)
-        token.objects.create(user=user)
-
+        
+        # Create user with encrypted password
+        user = CustomUser.objects.create_user(**validated_data)
+        
+        # Create token for the user
+        Token.objects.create(user=user)
+        
         return user
 
 class UserLoginSerializer(serializers.Serializer):
@@ -57,11 +64,14 @@ class UserLoginSerializer(serializers.Serializer):
     )
     
     def validate(self, data):
-        """Validate user credentials"""
+        """
+        Validate user credentials
+        """
         username = data.get('username')
         password = data.get('password')
         
         if username and password:
+            # Try to authenticate user
             user = authenticate(username=username, password=password)
             if user:
                 if user.is_active:
@@ -89,3 +99,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'followers_count', 'following_count'
         ]
         read_only_fields = ['id', 'username', 'date_joined']
+        extra_kwargs = {
+            'email': {'required': False},
+        }
