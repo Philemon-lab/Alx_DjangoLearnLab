@@ -1,4 +1,5 @@
 from django.shortcuts import render
+<<<<<<< HEAD
 from rest_framework import generics
 from .models import Author, Book
 from .serializers import AuthorSerializer, BookSerializer
@@ -26,3 +27,7 @@ class BookListCreateView(generics.ListCreateAPIView):
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+=======
+
+# Create your views here.
+>>>>>>> f408c826089a138d6b665aa4177820c10113a8bc
